@@ -168,8 +168,8 @@ sub pingone ($){
 
 sub debug($){
     my $message = shift;
-    open FILE, ">>/tmp/youtubeDL.log" or die $!
-    print FILE strftime("%Y-%m-%d %H:%M:%S> ",localtime)"".$message."\n";
+    open FILE, ">>/tmp/youtubeDL.log" or die $!;
+    print FILE strftime("%Y-%m-%d %H:%M:%S> ",localtime)."".$message."\n";
     close FILE;
 }
 
