@@ -19,6 +19,7 @@ use base qw(Smokeping::probes::basefork);
 use IPC::Open3;
 use Symbol;
 use Carp;
+use POSIX qw(strftime);
 
 sub pod_hash {
 	return {
@@ -116,10 +117,12 @@ sub pingone ($){
     my @times;
 
     $self->do_debug("query=$query\n");
+    debug("query=$query");
 #    for (my $run = 0; $run < $self->pings($target); $run++) {
 	my $pid = open3($inh,$outh,$errh, $query);
 	while (<$outh>) {
         $self->do_debug("output: ".$_);
+        debug("$_");
 	    if (/$time_re/i) {
             #time is returned like 0:02.13
             my $timestamp = $1;
@@ -159,7 +162,15 @@ sub pingone ($){
     @times = map {sprintf "%.10e", $_ } sort {$a <=> $b} grep {$_ ne "-"} @times;
 
     $self->do_debug("time=@times\n");
+    debug("time=@times");
     return @times;
+}
+
+sub debug($){
+    my $message = shift;
+    open FILE, ">>/tmp/youtubeDL.log" or die $!
+    print FILE strftime("%Y-%m-%d %H:%M:%S> ",localtime)"".$message."\n";
+    close FILE;
 }
 
 1;
