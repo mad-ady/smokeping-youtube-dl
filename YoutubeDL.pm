@@ -120,7 +120,7 @@ sub pingone ($){
 
     my @times;
 
-    $self->do_debugdebug("query=$query\n");
+    $self->do_debug("query=$query\n");
     syslog("debug", "query=$query");
 #    for (my $run = 0; $run < $self->pings($target); $run++) {
 	my $pid = open3($inh,$outh,$errh, $query);
