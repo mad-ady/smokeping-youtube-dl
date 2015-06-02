@@ -122,7 +122,7 @@ sub pingone ($){
 	my $pid = open3($inh,$outh,$errh, $query);
 	while (<$outh>) {
         $self->do_debug("output: ".$_);
-        debug("$_");
+        debug("output: ".$_);
 	    if (/$time_re/i) {
             #time is returned like 0:02.13
             my $timestamp = $1;
@@ -133,11 +133,13 @@ sub pingone ($){
                my $minutes = $2;
                my $seconds = $3; #fractional
                $time = $hours * 3600 + $minutes *60 + $seconds;
+               debug("Timestamp: $timestamp -> $time\n");
             }
             elsif($timestamp=~/([0-9]+):([0-9\.]+)/){
-               my $minutes = $2;
-               my $seconds = $3; #fractional
+               my $minutes = $1;
+               my $seconds = $2; #fractional
                $time = $minutes *60 + $seconds;
+               debug("Timestamp: $timestamp -> $time\n");
             }
             else{
                 #shouldn't get here
