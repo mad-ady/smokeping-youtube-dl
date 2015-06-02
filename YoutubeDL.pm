@@ -19,7 +19,7 @@ use base qw(Smokeping::probes::basefork);
 use IPC::Open3;
 use Symbol;
 use Carp;
-use POSIX qw(strftime);
+use Sys::Syslog qw(:standard :macros);;
 
 sub pod_hash {
 	return {
@@ -45,7 +45,11 @@ DOC
 }
 
 my $time_re=qr/^([0-9:\.]+) elapsed$/;
-
+#Set up syslog to write to local0
+openlog("YoutubeDL", "nofatal, pid", "local0");
+#set to LOG_ERROR to disable debugging
+setlogmask(LOG_DEBUG);
+ 
 sub new($$$)
 {
     my $proto = shift;
@@ -116,13 +120,13 @@ sub pingone ($){
 
     my @times;
 
-    $self->do_debug("query=$query\n");
-    debug("query=$query");
+    $self->do_debugdebug("query=$query\n");
+    syslog("debug", "query=$query");
 #    for (my $run = 0; $run < $self->pings($target); $run++) {
 	my $pid = open3($inh,$outh,$errh, $query);
 	while (<$outh>) {
         $self->do_debug("output: ".$_);
-        debug("output: ".$_);
+        syslog("debug", "output: ".$_);
 	    if (/$time_re/i) {
             #time is returned like 0:02.13
             my $timestamp = $1;
@@ -133,13 +137,15 @@ sub pingone ($){
                my $minutes = $2;
                my $seconds = $3; #fractional
                $time = $hours * 3600 + $minutes *60 + $seconds;
-               debug("Timestamp: $timestamp -> $time\n");
+               $self->do_debug("Timestamp: $timestamp -> $time\n");
+               syslog("debug","Timestamp: $timestamp -> $time\n");
             }
             elsif($timestamp=~/([0-9]+):([0-9\.]+)/){
                my $minutes = $1;
                my $seconds = $2; #fractional
                $time = $minutes *60 + $seconds;
-               debug("Timestamp: $timestamp -> $time\n");
+               $self->do_debug("Timestamp: $timestamp -> $time\n");
+               syslog("debug", "Timestamp: $timestamp -> $time\n");
             }
             else{
                 #shouldn't get here
@@ -164,15 +170,7 @@ sub pingone ($){
     @times = map {sprintf "%.10e", $_ } sort {$a <=> $b} grep {$_ ne "-"} @times;
 
     $self->do_debug("time=@times\n");
-    debug("time=@times");
+    syslog("debug", "time=@times");
     return @times;
 }
-
-sub debug($){
-    my $message = shift;
-    open FILE, ">>/tmp/youtubeDL.log" or die $!;
-    print FILE strftime("%Y-%m-%d %H:%M:%S> ",localtime)."".$message."\n";
-    close FILE;
-}
-
 1;
