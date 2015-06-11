@@ -20,21 +20,27 @@ Parameters:
 
 Logging:
 You can get logs of what goes on inside the plugin either by running smokeping with --debug, or by changing this line:
+```
   #set to LOG_ERROR to disable debugging
   setlogmask(LOG_MASK(LOG_ERROR));
+```
   
   to
   
+```
   #set to LOG_ERROR to disable debugging
   setlogmask(LOG_MASK(LOG_DEBUG));
+```
   
 After doing this (and restarting smokeping), the plugin's logs will go to syslog, local0.debug. You will need something like 
+```
   local0.*     /var/log/local.log
+```
 in your syslog configuration.
 
 
 Example probe configuration (poll every hour):
-
+```
 + YoutubeDL1h
 binary = /usr/local/bin/youtube-dl
 timeout = 300
@@ -47,3 +53,4 @@ title = STAR_WARS_Episode_7_TRAILER 1:47, 16M, 720p
 probe = YoutubeDL1h
 url = https://www.youtube.com/watch?v=clLYRvtsoZ0
 host = youtube.com
+```
