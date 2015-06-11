@@ -48,7 +48,7 @@ my $time_re=qr/^([0-9:\.]+) elapsed$/;
 #Set up syslog to write to local0
 openlog("YoutubeDL", "nofatal, pid", "local0");
 #set to LOG_ERROR to disable debugging
-setlogmask(LOG_MASK(LOG_DEBUG));
+setlogmask(LOG_MASK(LOG_ERROR));
  
 sub new($$$)
 {
