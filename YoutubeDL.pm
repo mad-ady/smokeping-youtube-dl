@@ -125,11 +125,19 @@ sub pingone ($){
     syslog("debug", "query=$query");
 #    for (my $run = 0; $run < $self->pings($target); $run++) {
 	my $pid = open3($inh,$outh,$errh, $query);
+    my $time_matched = 0;
+    my $error_found = 0;
 	while (<$outh>) {
         $self->do_debug("output: ".$_);
         syslog("debug", "output: ".$_);
+        if (/(ERROR:.*)/){
+            $error_found = 1;
+            $self->do_debug("Error while downloading video:$_\n");
+            syslog("error", "Error while downloading video:$_\n");
+        }
 	    if (/$time_re/i) {
             #time is returned like 0:02.13
+            $time_matched = 1;
             my $timestamp = $1;
             my $time = 0;
             #convert it to seconds
@@ -152,10 +160,22 @@ sub pingone ($){
                 #shouldn't get here
                 $self->do_debug("Unsuported format");
             }
-            push @times, $time;
+            if(! $error_found){
+                #record times only when there is no error, otherwise we are measuring script execution time without data download
+                push @times, $time;
+            }
+            else{
+                #in case of error, return 0
+                push @times, 0;
+            }
             last;
 	    }
 	}
+    if(! $time_matched){
+        $self->do_debug("Error while parsing command output - couldn't find the time. Is /usr/bin/time installed?\n");
+        syslog("error", "Error while parsing command output - couldn't find the time. Is /usr/bin/time installed?\n");
+    }
+    
 	waitpid $pid,0;
 	close $errh;
 	close $inh;
